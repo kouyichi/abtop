@@ -16,7 +16,8 @@
 
 use super::{context_window_for_model, process};
 use crate::model::{
-    AgentSession, ChatMessage, ChatRole, ChildProcess, SessionStatus, ToolCall, MAX_CHAT_MESSAGES,
+    AgentSession, ChatMessage, ChatRole, ChildProcess, LaunchSurface, SessionStatus, ToolCall,
+    MAX_CHAT_MESSAGES,
 };
 use rusqlite::{Connection, OpenFlags};
 use std::collections::{HashMap, HashSet};
@@ -444,6 +445,12 @@ impl HermesCollector {
 
             sessions.push(AgentSession {
                 agent_cli: "hermes",
+                // Hermes sessions are matched by their worker process
+                // (`python -m tui_gateway.slash_worker --session-key <id>`), a
+                // plain CLI invocation: Hermes ships no desktop-app bundle and
+                // no editor extension that vendors this worker. See
+                // find_hermes_pid_map.
+                launch_surface: LaunchSurface::Cli,
                 pid: matched_pid,
                 session_id: ds.id.clone(),
                 cwd,
